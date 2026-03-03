@@ -1,0 +1,27 @@
+{
+  "marketplace": "sethiraj_claude",
+  "displayName": "Sethiraj Claude Plugin Marketplace",
+  "description": "Official Claude Code plugin marketplace by Surendran E — curated plugins for test automation, web performance, and AI-assisted engineering.",
+  "author": {
+    "name": "Surendran E",
+    "github": "https://github.com/sethiraj"
+  },
+  "version": "1.0.0",
+  "updatedAt": "2026-03-03",
+  "plugins": [
+    {
+      "name": "end-user-perf",
+      "displayName": "End User Performance Reporter",
+      "description": "Plugin to evaluate and report end user performance of web applications using Google Lighthouse. Covers Web Core Vitals, network analysis, and optimization opportunities.",
+      "version": "1.0.0",
+      "author": {
+        "name": "Surendran E",
+        "github": "https://github.com/sethiraj"
+      },
+      "repository": "https://github.com/sethiraj/claude_lighthouse_plugin",
+      "keywords": ["performance", "web", "lighthouse", "core-vitals", "reporting", "metrics"],
+      "license": "MIT",
+      "install": "claude plugin add https://github.com/sethiraj/claude_lighthouse_plugin"
+    }
+  ]
+}
