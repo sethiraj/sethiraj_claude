@@ -1,0 +1,45 @@
+{
+  "marketplace": {
+    "name": "bdd-test-executor",
+    "displayName": "BDD Test Executor",
+    "version": "1.0.0",
+    "description": "Enable users to execute BDD test cases using playwright MCP",
+    "longDescription": "A Claude Code plugin that parses Gherkin BDD feature files and executes them against web applications using the Playwright MCP. On failure, captures the full error message, stack trace, browser console errors, and a screenshot. Generates a self-contained interactive HTML dashboard with feature-wise results, a global summary, and a consolidated failures view — no API key required.",
+    "author": {
+      "name": "Surendran E",
+      "github": "sethiraj"
+    },
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/sethiraj/sethiraj_claude"
+    },
+    "homepage": "https://github.com/sethiraj/sethiraj_claude",
+    "bugs": {
+      "url": "https://github.com/sethiraj/sethiraj_claude/issues"
+    },
+    "license": "MIT",
+    "keywords": ["bdd", "test", "playwright", "automation", "mcp", "gherkin", "dashboard"],
+    "category": "testing",
+    "tags": ["bdd", "playwright", "test-automation", "gherkin", "web-testing"],
+    "skills": [
+      {
+        "name": "bdd-test-executor",
+        "trigger": "/bdd-test-executor",
+        "description": "Parse and execute BDD Gherkin feature files against web applications using Playwright MCP"
+      }
+    ],
+    "agents": [
+      {
+        "name": "bdd-dashboard",
+        "trigger": "/bdd-dashboard",
+        "description": "Generate an interactive HTML test dashboard from BDD execution results with stack traces and screenshots"
+      }
+    ],
+    "mcpServers": ["playwright"],
+    "requirements": {
+      "node": ">=18.0.0",
+      "npm": ">=8.0.0"
+    },
+    "installCommand": "claude plugin add https://github.com/sethiraj/sethiraj_claude"
+  }
+}

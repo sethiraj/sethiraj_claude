@@ -1,0 +1,26 @@
+{
+  "name": "bdd-test-executor",
+  "displayName": "BDD Test Executor",
+  "description": "Parse and execute BDD Gherkin feature files against web applications using Playwright MCP. Captures full stack traces, console errors, and screenshots on failure. Generates a self-contained interactive HTML dashboard with feature-wise results and a consolidated failures view.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Surendran E",
+    "github": "https://github.com/sethiraj"
+  },
+  "repository": "https://github.com/sethiraj/sethiraj_claude",
+  "homepage": "https://github.com/sethiraj/sethiraj_claude/tree/main/plugins/bdd-test-executor#readme",
+  "license": "MIT",
+  "keywords": ["bdd", "test", "playwright", "automation", "mcp", "gherkin", "dashboard", "web-testing"],
+  "category": "testing",
+  "requires": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "mcpServers": ["playwright"],
+  "skills": ["bdd-test-executor"],
+  "agents": ["bdd-dashboard"],
+  "install": "claude plugin add https://github.com/sethiraj/sethiraj_claude/tree/main/plugins/bdd-test-executor",
+  "changelog": {
+    "1.0.0": "Initial release — Gherkin BDD parsing, Playwright MCP execution, failure stack trace capture, screenshot on failure, interactive HTML dashboard with Summary/Features/Tags/Failures tabs, feature folder auto-scan hook"
+  }
+}

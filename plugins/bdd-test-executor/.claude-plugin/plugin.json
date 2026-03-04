@@ -1,0 +1,21 @@
+{
+  "name": "bdd-test-executor",
+  "version": "1.0.0",
+  "description": "Enable users to execute BDD test cases using playwright MCP",
+  "author": {
+    "name": "Surendran E",
+    "github": "sethiraj"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sethiraj/sethiraj_claude"
+  },
+  "license": "MIT",
+  "keywords": ["bdd", "test", "playwright", "automation", "mcp"],
+  "commands": "./commands/",
+  "agents": "./agents/",
+  "skills": "./skills/",
+  "hooks": "./hooks/hooks.json",
+  "mcpServers": "./.mcp.json",
+  "marketplace": "./.claude-plugin/marketplace.json"
+}

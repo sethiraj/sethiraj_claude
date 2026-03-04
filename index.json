@@ -6,9 +6,24 @@
     "name": "Surendran E",
     "github": "https://github.com/sethiraj"
   },
-  "version": "1.0.0",
-  "updatedAt": "2026-03-03",
+  "version": "1.1.0",
+  "updatedAt": "2026-03-04",
   "plugins": [
+    {
+      "name": "bdd-test-executor",
+      "displayName": "BDD Test Executor",
+      "description": "Parse and execute BDD Gherkin feature files against web applications using Playwright MCP. Captures full stack traces, console errors, and screenshots on failure. Generates a self-contained interactive HTML dashboard.",
+      "version": "1.0.0",
+      "author": {
+        "name": "Surendran E",
+        "github": "https://github.com/sethiraj"
+      },
+      "repository": "https://github.com/sethiraj/sethiraj_claude",
+      "keywords": ["bdd", "test", "playwright", "automation", "mcp", "gherkin", "dashboard"],
+      "category": "testing",
+      "license": "MIT",
+      "install": "claude plugin add https://github.com/sethiraj/sethiraj_claude/tree/main/plugins/bdd-test-executor"
+    },
     {
       "name": "end-user-perf",
       "displayName": "End User Performance Reporter",
