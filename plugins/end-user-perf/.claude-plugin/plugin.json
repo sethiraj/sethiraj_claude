@@ -1,0 +1,13 @@
+{
+  "name": "end-user-perf",
+  "version": "1.0.0",
+  "description": "Evaluate and report end-user performance of web applications using Google Lighthouse. Covers Web Core Vitals, network analysis, and optimization opportunities.",
+  "author": {
+    "name": "Surendran E"
+  },
+  "license": "MIT",
+  "keywords": ["performance", "web", "lighthouse", "core-vitals", "reporting", "metrics"],
+  "agents": "./agents/",
+  "hooks": "./hooks/hooks.json",
+  "mcpServers": "./.mcp.json"
+}

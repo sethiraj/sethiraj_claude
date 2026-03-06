@@ -35,8 +35,9 @@
       },
       "repository": "https://github.com/sethiraj/claude_lighthouse_plugin",
       "keywords": ["performance", "web", "lighthouse", "core-vitals", "reporting", "metrics"],
+      "category": "performance",
       "license": "MIT",
-      "install": "claude plugin add https://github.com/sethiraj/claude_lighthouse_plugin"
+      "install": "claude plugin install end-user-perf@sethiraj_claude"
     },
     {
       "name": "api-test-runner",

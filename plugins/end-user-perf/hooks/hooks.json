@@ -1,0 +1,17 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "mcp__lighthouse__.*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/scripts/validate-lighthouse.sh\"",
+            "timeout": 120000,
+            "blocking": true
+          }
+        ]
+      }
+    ]
+  }
+}

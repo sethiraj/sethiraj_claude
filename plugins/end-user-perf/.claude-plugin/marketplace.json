@@ -1,0 +1,50 @@
+{
+  "marketplace": {
+    "name": "end-user-perf",
+    "displayName": "End User Performance Reporter",
+    "version": "1.0.0",
+    "description": "Evaluate and report end-user performance of web applications using Google Lighthouse. Covers Web Core Vitals, network analysis, and optimization opportunities.",
+    "longDescription": "A Claude Code plugin that runs a Google Lighthouse audit against any web application URL and generates a structured PDF performance report. The agent analyzes raw Lighthouse output and produces a report covering three key areas: Web Core Vitals (LCP, INP, CLS, FCP, TTFB, TBT, Speed Index) with scored pass/fail status; Network Analysis including latency, RTT, throughput, and a MIME-type breakdown table of all resources; and Estimated Savings & Opportunities listing every Lighthouse-identified optimization sorted by time savings, with affected URLs and recommended fixes. A PreToolUse hook automatically validates and installs Lighthouse via npm before any audit runs, with cross-platform support for Linux, macOS, and Windows.",
+    "author": {
+      "name": "Surendran E",
+      "github": "sethiraj"
+    },
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/sethiraj/sethiraj_claude"
+    },
+    "homepage": "https://github.com/sethiraj/sethiraj_claude/tree/main/plugins/end-user-perf#readme",
+    "bugs": {
+      "url": "https://github.com/sethiraj/sethiraj_claude/issues"
+    },
+    "license": "MIT",
+    "keywords": [
+      "performance", "web", "lighthouse", "core-vitals",
+      "reporting", "metrics", "web-vitals", "pdf"
+    ],
+    "category": "performance",
+    "tags": [
+      "lighthouse", "web-performance", "core-web-vitals",
+      "network-analysis", "pdf-report", "optimization"
+    ],
+    "agents": [
+      {
+        "name": "perf-report",
+        "trigger": "/perf-report",
+        "description": "Run a Lighthouse audit on a URL and generate a PDF report covering Web Core Vitals, Network Analysis, and Estimated Savings"
+      }
+    ],
+    "hooks": {
+      "PreToolUse": "Validates Lighthouse is installed before any audit; auto-installs via npm with cross-platform support (Linux, macOS, Windows)"
+    },
+    "mcpServers": ["lighthouse"],
+    "requirements": {
+      "node": ">=18.0.0",
+      "npm": ">=8.0.0"
+    },
+    "installCommand": "claude plugin install end-user-perf@sethiraj_claude",
+    "changelog": {
+      "1.0.0": "Initial release — Web Core Vitals, Network Analysis, Estimated Savings & Opportunities, PDF report generation, cross-platform Lighthouse auto-install hook"
+    }
+  }
+}
