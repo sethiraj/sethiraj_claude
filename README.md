@@ -200,12 +200,12 @@ Run the login.feature BDD test and generate a report
 | Version | 1.0.0 |
 | Author | Surendran E |
 | License | MIT |
-| Repository | [sethiraj/claude_lighthouse_plugin](https://github.com/sethiraj/claude_lighthouse_plugin) |
+| Repository | [sethiraj/sethiraj_claude](https://github.com/sethiraj/sethiraj_claude/tree/main/plugins/end-user-perf) |
 | Requirements | Node.js ≥ 18, npm ≥ 8 *(Lighthouse auto-installed if missing)* |
 
 **Install:**
 ```bash
-claude plugin add https://github.com/sethiraj/claude_lighthouse_plugin
+claude plugin install end-user-perf@sethiraj_claude
 ```
 
 ### What it does
@@ -238,9 +238,9 @@ plugins/<name>/
 ├── entry.json               Lightweight index record
 ├── README.md                Plugin documentation
 ├── agents/                  Claude Code agents
-├── skills/                  Claude Code skills
+├── skills/                  Claude Code skills (optional)
 ├── hooks/                   Hook configuration
-└── scripts/                 Executable scripts
+└── scripts/                 Executable scripts (optional)
 ```
 
 ---
