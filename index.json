@@ -6,8 +6,8 @@
     "name": "Surendran E",
     "github": "https://github.com/sethiraj"
   },
-  "version": "1.1.0",
-  "updatedAt": "2026-03-04",
+  "version": "1.2.0",
+  "updatedAt": "2026-03-06",
   "plugins": [
     {
       "name": "bdd-test-executor",
@@ -37,6 +37,21 @@
       "keywords": ["performance", "web", "lighthouse", "core-vitals", "reporting", "metrics"],
       "license": "MIT",
       "install": "claude plugin add https://github.com/sethiraj/claude_lighthouse_plugin"
+    },
+    {
+      "name": "api-test-runner",
+      "displayName": "API Test Runner",
+      "description": "Execute API test cases from Swagger / OpenAPI specs using Playwright. Auto-acquires bearer tokens, loads parameters from files, and streams results to a live dashboard with charts, stack traces, and PDF export.",
+      "version": "1.2.0",
+      "author": {
+        "name": "Surendran E",
+        "github": "https://github.com/sethiraj"
+      },
+      "repository": "https://github.com/sethiraj/sethiraj_claude",
+      "keywords": ["api", "testing", "playwright", "swagger", "openapi", "rest", "bearer-token", "dashboard", "reporting"],
+      "category": "testing",
+      "license": "MIT",
+      "install": "claude plugin install api-test-runner@sethiraj_claude"
     }
   ]
 }

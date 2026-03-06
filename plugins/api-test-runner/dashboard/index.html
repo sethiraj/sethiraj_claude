@@ -1,0 +1,1219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>API Test Runner — Dashboard</title>
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <!-- jsPDF + autoTable -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+  <!-- html2canvas -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+  <style>
+    :root {
+      --bg:         #0f172a;
+      --surface:    #1e293b;
+      --surface2:   #293548;
+      --border:     #334155;
+      --text:       #e2e8f0;
+      --muted:      #94a3b8;
+      --pass:       #10b981;
+      --pass-bg:    rgba(16,185,129,.12);
+      --fail:       #ef4444;
+      --fail-bg:    rgba(239,68,68,.12);
+      --accent:     #6366f1;
+      --accent-bg:  rgba(99,102,241,.12);
+      --warn:       #f59e0b;
+      --radius:     10px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      font-size: 14px;
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+
+    /* ── Header ────────────────────────────────────────────────────────────── */
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 24px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 200;
+      backdrop-filter: blur(8px);
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      font-size: 15px;
+      letter-spacing: -.01em;
+    }
+
+    .logo-icon {
+      width: 30px; height: 30px;
+      background: var(--accent);
+      border-radius: 7px;
+      display: grid;
+      place-items: center;
+      font-size: 15px;
+    }
+
+    .logo-sub { color: var(--muted); font-weight: 400; font-size: 13px; }
+
+    .hdr-right { display: flex; align-items: center; gap: 10px; }
+
+    .live-pill {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--muted);
+      padding: 4px 10px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+    }
+
+    .dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--pass);
+    }
+
+    .dot.off { background: var(--fail); }
+    .dot.live { animation: blink 1.8s ease-in-out infinite; }
+
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+    .btn {
+      height: 32px;
+      padding: 0 14px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--surface2);
+      color: var(--text);
+      cursor: pointer;
+      font-size: 13px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: background .15s, border-color .15s;
+      white-space: nowrap;
+    }
+
+    .btn:hover { background: var(--border); }
+
+    .btn-danger { border-color: var(--fail); color: var(--fail); }
+    .btn-danger:hover { background: var(--fail-bg); }
+
+    .btn-primary { background: var(--accent); border-color: var(--accent); }
+    .btn-primary:hover { opacity: .88; }
+
+    /* ── Layout ─────────────────────────────────────────────────────────────── */
+    main {
+      padding: 24px;
+      max-width: 1440px;
+      margin: 0 auto;
+    }
+
+    /* ── Stat cards ─────────────────────────────────────────────────────────── */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 20px;
+    }
+
+    .card-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .07em;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+
+    .card-value {
+      font-size: 2.2rem;
+      font-weight: 800;
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .card-sub {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+
+    .c-accent { color: var(--accent); }
+    .c-pass   { color: var(--pass); }
+    .c-fail   { color: var(--fail); }
+    .c-warn   { color: var(--warn); }
+
+    /* ── Charts row ─────────────────────────────────────────────────────────── */
+    .charts-row {
+      display: grid;
+      grid-template-columns: 1fr 320px;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .chart-card { padding: 20px; }
+
+    .chart-hdr {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+
+    .chart-title {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .07em;
+      color: var(--muted);
+    }
+
+    .chart-legend { display: flex; gap: 14px; font-size: 11px; color: var(--muted); }
+    .leg-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 4px; }
+
+    .chart-wrap { position: relative; height: 230px; }
+    .donut-wrap { position: relative; height: 180px; }
+
+    .donut-center {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+    }
+
+    .donut-pct  { font-size: 1.6rem; font-weight: 800; color: var(--pass); }
+    .donut-lbl  { font-size: 11px; color: var(--muted); }
+
+    /* ── Results section ────────────────────────────────────────────────────── */
+    .results-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .results-hdr {
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .results-title {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .07em;
+      color: var(--muted);
+    }
+
+    .filters { display: flex; gap: 6px; }
+
+    .flt {
+      padding: 3px 12px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 12px;
+      transition: all .15s;
+    }
+
+    .flt.active           { color: var(--text); border-color: var(--accent); background: var(--accent-bg); }
+    .flt.active.f-pass    { color: var(--pass);  border-color: var(--pass);  background: var(--pass-bg); }
+    .flt.active.f-fail    { color: var(--fail);  border-color: var(--fail);  background: var(--fail-bg); }
+
+    .search-box {
+      height: 28px;
+      padding: 0 10px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--surface2);
+      color: var(--text);
+      font-size: 12px;
+      width: 200px;
+    }
+
+    .search-box::placeholder { color: var(--muted); }
+
+    .table-wrap { overflow-x: auto; max-height: 500px; overflow-y: auto; }
+
+    table { width: 100%; border-collapse: collapse; }
+
+    thead th {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      padding: 9px 14px;
+      text-align: left;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      color: var(--muted);
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+      user-select: none;
+      cursor: pointer;
+    }
+
+    thead th:hover { color: var(--text); }
+    thead th.sort-asc::after  { content: ' ▲'; }
+    thead th.sort-desc::after { content: ' ▼'; }
+
+    td {
+      padding: 11px 14px;
+      border-bottom: 1px solid rgba(51,65,85,.5);
+      font-size: 13px;
+      vertical-align: middle;
+    }
+
+    tr:last-child > td { border-bottom: none; }
+
+    .tr-pass:hover td { background: var(--pass-bg); }
+    .tr-fail:hover td { background: var(--fail-bg); }
+
+    /* status badge */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 9px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .b-pass { background: var(--pass-bg); color: var(--pass); }
+    .b-fail { background: var(--fail-bg); color: var(--fail); }
+
+    /* method badge */
+    .mth {
+      display: inline-block;
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .mth-GET    { background:#0c4a6e; color:#38bdf8; }
+    .mth-POST   { background:#064e3b; color:#34d399; }
+    .mth-PUT    { background:#431407; color:#fb923c; }
+    .mth-DELETE { background:#450a0a; color:#f87171; }
+    .mth-PATCH  { background:#3b1464; color:#c084fc; }
+
+    .ep   { font-family: monospace; font-size: 12px; color: var(--muted); }
+    .dur  { font-family: monospace; font-size: 12px; color: var(--muted); }
+    .ts   { font-size: 12px; color: var(--muted); }
+
+    .expand-btn {
+      border: 1px solid var(--border);
+      background: none;
+      color: var(--muted);
+      border-radius: 5px;
+      padding: 2px 10px;
+      cursor: pointer;
+      font-size: 11px;
+      transition: all .15s;
+    }
+
+    .expand-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* detail row */
+    .tr-detail { display: none; }
+    .tr-detail.open { display: table-row; }
+
+    .detail-cell {
+      padding: 0 !important;
+      background: var(--bg);
+      border-bottom: 2px solid var(--border) !important;
+    }
+
+    .detail-inner { padding: 14px 16px; }
+
+    /* tabs */
+    .tabs { display: flex; border-bottom: 1px solid var(--border); background: var(--surface); }
+
+    .tab {
+      padding: 8px 16px;
+      font-size: 12px;
+      font-weight: 500;
+      border: none;
+      background: none;
+      color: var(--muted);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      transition: all .15s;
+    }
+
+    .tab.active { color: var(--text); border-bottom-color: var(--accent); }
+
+    .pane { display: none; padding: 14px; background: var(--surface2); }
+    .pane.active { display: block; }
+
+    pre {
+      font-family: 'Cascadia Code', 'Fira Code', Consolas, monospace;
+      font-size: 12px;
+      white-space: pre-wrap;
+      word-break: break-all;
+      line-height: 1.65;
+      max-height: 320px;
+      overflow-y: auto;
+    }
+
+    .st-err  { color: var(--fail); font-weight: 700; }
+    .st-at   { color: var(--warn); }
+    .st-dim  { color: var(--muted); }
+
+    /* empty state */
+    .empty {
+      text-align: center;
+      padding: 60px 24px;
+      color: var(--muted);
+    }
+
+    .empty code {
+      background: var(--surface2);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 12px;
+    }
+
+    /* flash animation on new row */
+    .flash { animation: rowflash 1.8s ease-out; }
+
+    @keyframes rowflash {
+      0%   { background: var(--accent-bg); }
+      100% { background: transparent; }
+    }
+
+    /* toast */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 11px 16px;
+      font-size: 13px;
+      z-index: 999;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      opacity: 0;
+      transform: translateY(6px);
+      transition: opacity .2s, transform .2s;
+      pointer-events: none;
+      max-width: 340px;
+    }
+
+    .toast.show { opacity: 1; transform: none; }
+
+    /* responsive */
+    @media (max-width: 960px) {
+      .stats-row  { grid-template-columns: repeat(2, 1fr); }
+      .charts-row { grid-template-columns: 1fr; }
+    }
+
+    @media print {
+      header .hdr-right { display: none; }
+      .results-hdr .filters, .results-hdr .search-box { display: none; }
+      .expand-btn { display: none; }
+      .tr-detail  { display: none !important; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Header ─────────────────────────────────────────────────────────────── -->
+<header>
+  <div class="logo">
+    <div class="logo-icon">▶</div>
+    API Test Runner
+    <span class="logo-sub">Dashboard</span>
+  </div>
+
+  <div class="hdr-right">
+    <div class="live-pill">
+      <span class="dot live" id="statusDot"></span>
+      <span id="statusTxt">Connecting…</span>
+    </div>
+    <button class="btn" onclick="refreshAll()">↻ Refresh</button>
+    <button class="btn btn-danger" onclick="clearHistory()">🗑 Clear</button>
+    <button class="btn btn-primary" onclick="exportPDF()">⬇ Export PDF</button>
+  </div>
+</header>
+
+<!-- ── Main ──────────────────────────────────────────────────────────────── -->
+<main id="reportArea">
+
+  <!-- Stats -->
+  <div class="stats-row">
+    <div class="card">
+      <div class="card-label">Total Runs</div>
+      <div class="card-value c-accent" id="sTotal">—</div>
+      <div class="card-sub" id="sLastRun">No runs yet</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Pass Rate</div>
+      <div class="card-value c-pass" id="sPassRate">—</div>
+      <div class="card-sub" id="sPassCount">— passed</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Failures</div>
+      <div class="card-value c-fail" id="sFailed">—</div>
+      <div class="card-sub" id="sFailCount">— failed</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Avg Duration</div>
+      <div class="card-value" id="sAvg">—</div>
+      <div class="card-sub">last 20 runs</div>
+    </div>
+  </div>
+
+  <!-- Charts -->
+  <div class="charts-row" id="chartsArea">
+    <div class="card chart-card">
+      <div class="chart-hdr">
+        <span class="chart-title">Response Time &amp; Pass/Fail Trend</span>
+        <span class="chart-legend">
+          <span><span class="leg-dot" style="background:var(--pass)"></span>Pass</span>
+          <span><span class="leg-dot" style="background:var(--fail)"></span>Fail</span>
+          <span><span class="leg-dot" style="background:var(--accent)"></span>Duration</span>
+        </span>
+      </div>
+      <div class="chart-wrap"><canvas id="trendChart"></canvas></div>
+    </div>
+
+    <div class="card chart-card">
+      <div class="chart-hdr">
+        <span class="chart-title">Distribution</span>
+      </div>
+      <div class="donut-wrap">
+        <canvas id="donutChart"></canvas>
+        <div class="donut-center">
+          <div class="donut-pct" id="donutPct">—</div>
+          <div class="donut-lbl">pass rate</div>
+        </div>
+      </div>
+      <div class="chart-legend" style="justify-content:center;margin-top:12px">
+        <span><span class="leg-dot" style="background:var(--pass)"></span>Passed</span>
+        <span><span class="leg-dot" style="background:var(--fail)"></span>Failed</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Results table -->
+  <div class="results-card">
+    <div class="results-hdr">
+      <span class="results-title">Execution History (<span id="rowCount">0</span>)</span>
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <input class="search-box" type="search" placeholder="Filter by endpoint…" oninput="applyFilters()" id="searchBox">
+        <div class="filters">
+          <button class="flt active"   onclick="setFilter('all',  this)">All</button>
+          <button class="flt f-pass"   onclick="setFilter('pass', this)">✅ Passed</button>
+          <button class="flt f-fail"   onclick="setFilter('fail', this)">❌ Failed</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th onclick="sortBy('timestamp')"   style="width:140px">Time</th>
+            <th onclick="sortBy('method')"      style="width:74px">Method</th>
+            <th onclick="sortBy('endpoint')">Endpoint</th>
+            <th onclick="sortBy('status')"      style="width:94px">Status</th>
+            <th onclick="sortBy('duration')"    style="width:84px">Duration</th>
+            <th                                 style="width:100px">Spec</th>
+            <th                                 style="width:74px">Details</th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── State ──────────────────────────────────────────────────────────────────────
+let allResults  = [];
+let filter      = 'all';
+let searchTerm  = '';
+let sortKey     = 'timestamp';
+let sortDir     = -1;           // -1 = desc, 1 = asc
+let openRows    = new Set();
+let trendChart  = null;
+let donutChart  = null;
+
+// ── Bootstrap ──────────────────────────────────────────────────────────────────
+async function init() {
+  initCharts();
+  await refreshAll();
+  connectSSE();
+}
+
+async function refreshAll() {
+  try {
+    const [results, stats] = await Promise.all([
+      fetch('/api/results').then(r => r.json()),
+      fetch('/api/stats').then(r => r.json()),
+    ]);
+    allResults = results;
+    renderStats(stats);
+    renderCharts(results);
+    renderTable();
+  } catch (e) {
+    toast('⚠ Could not reach dashboard server: ' + e.message, 5000);
+  }
+}
+
+// ── SSE ────────────────────────────────────────────────────────────────────────
+function connectSSE() {
+  const es = new EventSource('/api/events');
+
+  es.onopen = () => {
+    setStatus(true);
+  };
+
+  es.onmessage = (e) => {
+    const msg = JSON.parse(e.data);
+    if (msg.type === 'result') {
+      allResults.unshift(msg.data);
+      if (allResults.length > 500) allResults.pop();
+      renderStats(computeStats(allResults));
+      renderCharts(allResults);
+      renderTable();
+      scheduleFlash(msg.data.id);
+      const icon = msg.data.passed ? '✅' : '❌';
+      toast(`${icon} ${msg.data.method} ${msg.data.endpoint} — ${msg.data.status} (${msg.data.duration}ms)`);
+    }
+    if (msg.type === 'stats') {
+      renderStats(msg.data);
+    }
+    if (msg.type === 'cleared') {
+      allResults = [];
+      renderStats(computeStats([]));
+      renderCharts([]);
+      renderTable();
+    }
+  };
+
+  es.onerror = () => {
+    setStatus(false);
+    es.close();
+    setTimeout(connectSSE, 5000);
+  };
+}
+
+function setStatus(live) {
+  const dot = document.getElementById('statusDot');
+  const txt = document.getElementById('statusTxt');
+  dot.className = 'dot ' + (live ? 'live' : 'off');
+  txt.textContent = live ? 'Live' : 'Disconnected — reconnecting…';
+}
+
+// ── Stats ──────────────────────────────────────────────────────────────────────
+function computeStats(results) {
+  const total   = results.length;
+  const passed  = results.filter(r => r.passed).length;
+  const failed  = total - passed;
+  const recent  = results.slice(0, 20);
+  const avgDur  = recent.length
+    ? Math.round(recent.reduce((s, r) => s + (r.duration || 0), 0) / recent.length) : 0;
+  const lastRun = results[0] ? results[0].timestamp : null;
+  return {
+    total, passed, failed, avgDuration: avgDur, lastRun,
+    passRate: total ? ((passed / total) * 100).toFixed(1) : '0.0',
+  };
+}
+
+function renderStats(s) {
+  set('sTotal',    s.total);
+  set('sPassRate', s.passRate + '%');
+  set('sFailed',   s.failed);
+  set('sAvg',      s.avgDuration ? s.avgDuration + 'ms' : '—');
+  set('sPassCount', s.passed + ' passed');
+  set('sFailCount', s.failed + ' failed');
+  set('sLastRun',  s.lastRun ? 'Last: ' + relTime(s.lastRun) : 'No runs yet');
+  set('donutPct',  s.passRate + '%');
+}
+
+// ── Charts ─────────────────────────────────────────────────────────────────────
+function initCharts() {
+  Chart.defaults.color       = '#94a3b8';
+  Chart.defaults.borderColor = '#334155';
+
+  // Trend chart
+  trendChart = new Chart(document.getElementById('trendChart'), {
+    type: 'line',
+    data: {
+      labels: [],
+      datasets: [
+        {
+          label: 'Duration (ms)',
+          data: [],
+          borderColor: '#6366f1',
+          backgroundColor: 'rgba(99,102,241,.08)',
+          fill: true,
+          tension: 0.35,
+          pointBackgroundColor: [],
+          pointBorderColor:     [],
+          pointBorderWidth: 2,
+          pointRadius: 5,
+          pointHoverRadius: 8,
+          yAxisID: 'y',
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: { duration: 300 },
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#1e293b',
+          borderColor: '#334155',
+          borderWidth: 1,
+          callbacks: {
+            title: (items) => {
+              const r = trendSrc[items[0].dataIndex];
+              return r ? `${r.method} ${r.endpoint}` : items[0].label;
+            },
+            label: (ctx) => {
+              const r = trendSrc[ctx.dataIndex];
+              if (!r) return ctx.formattedValue + 'ms';
+              const icon = r.passed ? '✅' : '❌';
+              return `${icon} ${ctx.parsed.y}ms — HTTP ${r.status}`;
+            },
+          },
+        },
+      },
+      scales: {
+        x: {
+          grid: { color: 'rgba(51,65,85,.4)' },
+          ticks: { maxRotation: 40, font: { size: 10 }, maxTicksLimit: 15 },
+        },
+        y: {
+          grid: { color: 'rgba(51,65,85,.4)' },
+          title: { display: true, text: 'ms', font: { size: 11 } },
+          beginAtZero: true,
+        },
+      },
+    },
+  });
+
+  // Donut chart
+  donutChart = new Chart(document.getElementById('donutChart'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Passed', 'Failed'],
+      datasets: [{
+        data: [0, 0],
+        backgroundColor: ['#10b981', '#ef4444'],
+        borderColor: '#1e293b',
+        borderWidth: 4,
+        hoverOffset: 6,
+      }],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: { duration: 400 },
+      cutout: '72%',
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#1e293b',
+          borderColor: '#334155',
+          borderWidth: 1,
+          callbacks: {
+            label: (ctx) => {
+              const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
+              const pct   = total ? ((ctx.parsed / total) * 100).toFixed(1) : '0.0';
+              return ` ${ctx.label}: ${ctx.parsed} (${pct}%)`;
+            },
+          },
+        },
+      },
+    },
+  });
+}
+
+let trendSrc = [];
+
+function renderCharts(results) {
+  const recent = results.slice(0, 50).reverse();
+  trendSrc = recent;
+
+  trendChart.data.labels = recent.map(r => fmtTime(r.timestamp));
+  trendChart.data.datasets[0].data                    = recent.map(r => r.duration || 0);
+  trendChart.data.datasets[0].pointBackgroundColor    = recent.map(r => r.passed ? '#10b981' : '#ef4444');
+  trendChart.data.datasets[0].pointBorderColor        = recent.map(r => r.passed ? '#10b981' : '#ef4444');
+  trendChart.update('none');
+
+  const passed = results.filter(r => r.passed).length;
+  donutChart.data.datasets[0].data = [passed, results.length - passed];
+  donutChart.update('none');
+}
+
+// ── Table ──────────────────────────────────────────────────────────────────────
+function setFilter(f, btn) {
+  filter = f;
+  document.querySelectorAll('.flt').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderTable();
+}
+
+function applyFilters() {
+  searchTerm = document.getElementById('searchBox').value.toLowerCase().trim();
+  renderTable();
+}
+
+function sortBy(key) {
+  if (sortKey === key) sortDir *= -1;
+  else { sortKey = key; sortDir = -1; }
+  document.querySelectorAll('thead th').forEach(th => th.className = '');
+  const hdrs = ['timestamp','method','endpoint','status','duration'];
+  const idx  = hdrs.indexOf(key);
+  if (idx >= 0) {
+    document.querySelectorAll('thead th')[idx].className = sortDir === -1 ? 'sort-desc' : 'sort-asc';
+  }
+  renderTable();
+}
+
+function getFiltered() {
+  let rows = allResults.slice();
+
+  if (filter === 'pass') rows = rows.filter(r => r.passed);
+  if (filter === 'fail') rows = rows.filter(r => !r.passed);
+
+  if (searchTerm) {
+    rows = rows.filter(r =>
+      (r.endpoint || '').toLowerCase().includes(searchTerm) ||
+      (r.method   || '').toLowerCase().includes(searchTerm) ||
+      (r.specName || '').toLowerCase().includes(searchTerm) ||
+      String(r.status  || '').includes(searchTerm)
+    );
+  }
+
+  rows.sort((a, b) => {
+    let av = a[sortKey], bv = b[sortKey];
+    if (typeof av === 'string') av = av.toLowerCase();
+    if (typeof bv === 'string') bv = bv.toLowerCase();
+    return av < bv ? -sortDir : av > bv ? sortDir : 0;
+  });
+
+  return rows;
+}
+
+function renderTable() {
+  const rows = getFiltered();
+  set('rowCount', rows.length);
+  const tbody = document.getElementById('tbody');
+
+  if (rows.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="7" class="empty">
+      No ${filter !== 'all' ? filter + 'ed ' : ''}executions recorded yet.<br><br>
+      Run: <code>node scripts/api-runner.js --spec ./api.json --method GET --endpoint /path --report</code>
+    </td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = rows.map(r => buildRow(r)).join('');
+}
+
+function buildRow(r) {
+  const specName  = r.specName || (r.spec ? r.spec.split(/[/\\]/).pop() : '—');
+  const mthClass  = 'mth mth-' + (r.method || 'GET');
+  const bClass    = r.passed ? 'badge b-pass' : 'badge b-fail';
+  const bIcon     = r.passed ? '✓' : '✕';
+  const trClass   = r.passed ? 'tr-pass' : 'tr-fail';
+  const hasDetail = !r.passed || r.body !== undefined || r.error;
+
+  return `
+  <tr class="${trClass}" id="tr-${r.id}">
+    <td class="ts">${relTime(r.timestamp)}</td>
+    <td><span class="${mthClass}">${esc(r.method)}</span></td>
+    <td class="ep" title="${esc(r.endpoint)}">${esc(r.endpoint || '—')}</td>
+    <td><span class="${bClass}">${bIcon} ${r.status}</span></td>
+    <td class="dur">${r.duration != null ? r.duration + 'ms' : '—'}</td>
+    <td class="ts" title="${esc(r.spec || '')}">${esc(specName)}</td>
+    <td>${hasDetail
+      ? `<button class="expand-btn" onclick="toggleRow('${r.id}')">Details</button>`
+      : '<span style="color:var(--muted)">—</span>'}</td>
+  </tr>
+  <tr class="tr-detail ${openRows.has(r.id) ? 'open' : ''}" id="det-${r.id}">
+    <td colspan="7" class="detail-cell">
+      ${buildDetail(r)}
+    </td>
+  </tr>`;
+}
+
+function buildDetail(r) {
+  const tabs = [];
+  const panes = [];
+
+  // Response body tab
+  tabs.push(`<button class="tab active" onclick="switchTab(event,'pane-resp-${r.id}')">Response</button>`);
+  const bodyStr = r.body != null
+    ? (typeof r.body === 'object' ? JSON.stringify(r.body, null, 2) : String(r.body))
+    : '(empty response)';
+  panes.push(`<div class="pane active" id="pane-resp-${r.id}"><pre>${esc(bodyStr)}</pre></div>`);
+
+  // Stack trace tab (only for failures with error info)
+  if (r.error || r.stackTrace) {
+    tabs.push(`<button class="tab" onclick="switchTab(event,'pane-stack-${r.id}')">Stack Trace</button>`);
+    panes.push(`<div class="pane" id="pane-stack-${r.id}"><pre>${fmtStack(r.error, r.stackTrace)}</pre></div>`);
+  }
+
+  // Request meta tab
+  tabs.push(`<button class="tab" onclick="switchTab(event,'pane-req-${r.id}')">Request Info</button>`);
+  const meta = {
+    method:     r.method,
+    endpoint:   r.endpoint,
+    baseUrl:    r.baseUrl,
+    spec:       r.spec,
+    timestamp:  r.timestamp,
+    duration:   (r.duration || 0) + 'ms',
+    passed:     r.passed,
+  };
+  panes.push(`<div class="pane" id="pane-req-${r.id}"><pre>${esc(JSON.stringify(meta, null, 2))}</pre></div>`);
+
+  return `<div><div class="tabs">${tabs.join('')}</div>${panes.join('')}</div>`;
+}
+
+function fmtStack(error, stack) {
+  const raw = stack || error || '(no stack trace available)';
+  return raw.split('\n').map(line => {
+    if (/^(\w+Error|Error):/.test(line.trim())) return `<span class="st-err">${esc(line)}</span>`;
+    if (line.trim().startsWith('at '))           return `<span class="st-at">${esc(line)}</span>`;
+    return `<span class="st-dim">${esc(line)}</span>`;
+  }).join('\n');
+}
+
+function toggleRow(id) {
+  const det = document.getElementById('det-' + id);
+  if (!det) return;
+  if (det.classList.contains('open')) {
+    det.classList.remove('open');
+    openRows.delete(id);
+  } else {
+    det.classList.add('open');
+    openRows.add(id);
+  }
+}
+
+function switchTab(e, paneId) {
+  const tabBar = e.target.closest('.tabs');
+  tabBar.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  e.target.classList.add('active');
+  const paneArea = tabBar.nextElementSibling;
+  // paneArea may be a fragment — walk siblings
+  let el = tabBar.nextElementSibling;
+  while (el) { el.classList.remove('active'); el = el.nextElementSibling; }
+  const target = document.getElementById(paneId);
+  if (target) target.classList.add('active');
+}
+
+let flashPending = null;
+function scheduleFlash(id) {
+  // Defer to next render cycle
+  requestAnimationFrame(() => {
+    const row = document.getElementById('tr-' + id);
+    if (row) { row.classList.remove('flash'); void row.offsetWidth; row.classList.add('flash'); }
+  });
+}
+
+// ── PDF Export ─────────────────────────────────────────────────────────────────
+async function exportPDF() {
+  toast('⏳ Generating PDF report…', 10000);
+  try {
+    const { jsPDF } = window.jspdf;
+    const doc  = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+    const W    = doc.internal.pageSize.getWidth();
+    const H    = doc.internal.pageSize.getHeight();
+    const fill = (r, g, b) => doc.setFillColor(r, g, b);
+    const bg   = () => { fill(15, 23, 42); doc.rect(0, 0, W, H, 'F'); };
+
+    // ─ Page 1: Cover ──────────────────────────────────────────────────────────
+    bg();
+    doc.setFontSize(26); doc.setTextColor(226, 232, 240);
+    doc.text('API Test Runner', W / 2, 28, { align: 'center' });
+    doc.setFontSize(14); doc.setTextColor(148, 163, 184);
+    doc.text('Execution Report', W / 2, 38, { align: 'center' });
+    doc.setFontSize(10);
+    doc.text('Generated: ' + new Date().toLocaleString(), W / 2, 50, { align: 'center' });
+
+    // Stats band
+    const stats = computeStats(allResults);
+    const cols  = [
+      { label: 'Total Runs',  value: String(stats.total),        color: [99, 102, 241] },
+      { label: 'Pass Rate',   value: stats.passRate + '%',        color: [16, 185, 129] },
+      { label: 'Failures',    value: String(stats.failed),        color: [239, 68, 68]  },
+      { label: 'Avg Duration',value: stats.avgDuration + 'ms',    color: [226, 232, 240]},
+    ];
+    const cw = W / 4;
+    cols.forEach((c, i) => {
+      const x = cw * i + cw / 2;
+      doc.setFontSize(20); doc.setTextColor(...c.color);
+      doc.text(c.value, x, 72, { align: 'center' });
+      doc.setFontSize(9); doc.setTextColor(148, 163, 184);
+      doc.text(c.label, x, 80, { align: 'center' });
+    });
+
+    // ─ Page 2: Charts ─────────────────────────────────────────────────────────
+    const chartsEl = document.getElementById('chartsArea');
+    if (chartsEl) {
+      const canvas = await html2canvas(chartsEl, {
+        backgroundColor: '#0f172a',
+        scale: 1.8,
+        useCORS: true,
+      });
+      doc.addPage();
+      bg();
+      doc.setFontSize(11); doc.setTextColor(148, 163, 184);
+      doc.text('Execution Trends', 14, 12);
+      const imgH = Math.min((canvas.height / canvas.width) * (W - 28), H - 26);
+      doc.addImage(canvas.toDataURL('image/png'), 'PNG', 14, 18, W - 28, imgH);
+    }
+
+    // ─ Page 3: Results table ──────────────────────────────────────────────────
+    doc.addPage();
+    bg();
+    doc.setFontSize(11); doc.setTextColor(148, 163, 184);
+    doc.text('Execution History (latest 200)', 14, 12);
+
+    const tableRows = allResults.slice(0, 200).map(r => [
+      relTime(r.timestamp),
+      r.method  || '—',
+      r.endpoint || '—',
+      (r.passed ? '✓ ' : '✕ ') + (r.status || '—'),
+      (r.duration || 0) + 'ms',
+      r.specName || '—',
+    ]);
+
+    doc.autoTable({
+      startY: 18,
+      head: [['Time', 'Method', 'Endpoint', 'Status', 'Duration', 'Spec']],
+      body: tableRows,
+      theme: 'grid',
+      styles: {
+        fontSize: 8,
+        textColor: [226, 232, 240],
+        fillColor: [30, 41, 59],
+        lineColor: [51, 65, 85],
+        lineWidth: 0.1,
+      },
+      headStyles: {
+        fillColor: [41, 53, 72],
+        textColor: [148, 163, 184],
+        fontStyle: 'bold',
+      },
+      alternateRowStyles: { fillColor: [24, 34, 50] },
+      columnStyles: {
+        0: { cellWidth: 28 },
+        1: { cellWidth: 18 },
+        4: { cellWidth: 20 },
+        5: { cellWidth: 28 },
+      },
+      didParseCell: (data) => {
+        if (data.section === 'body' && data.column.index === 3) {
+          const txt = data.cell.text[0] || '';
+          data.cell.styles.textColor = txt.startsWith('✓')
+            ? [16, 185, 129]
+            : [239, 68, 68];
+          data.cell.styles.fontStyle = 'bold';
+        }
+      },
+    });
+
+    // ─ Page 4+: Failure details ───────────────────────────────────────────────
+    const failures = allResults.filter(r => !r.passed);
+    if (failures.length > 0) {
+      doc.addPage();
+      bg();
+      doc.setFontSize(12); doc.setTextColor(239, 68, 68);
+      doc.text('Failure Details & Stack Traces', 14, 14);
+
+      let y = 24;
+      const maxPerPage = H - 20;
+
+      for (const r of failures.slice(0, 50)) {
+        if (y > maxPerPage - 30) {
+          doc.addPage();
+          bg();
+          y = 14;
+        }
+
+        // Failure header
+        doc.setFontSize(9); doc.setTextColor(239, 68, 68);
+        doc.text(`✕  ${r.method}  ${r.endpoint}  —  HTTP ${r.status}  (${r.duration || 0}ms)`, 14, y);
+        y += 5;
+
+        doc.setFontSize(8); doc.setTextColor(148, 163, 184);
+        doc.text(`   ${relTime(r.timestamp)}  |  ${r.specName || r.spec || '—'}`, 14, y);
+        y += 5;
+
+        // Error message
+        if (r.error) {
+          doc.setTextColor(251, 146, 60);
+          const errLines = doc.splitTextToSize('   Error: ' + r.error, W - 28);
+          doc.text(errLines.slice(0, 3), 14, y);
+          y += errLines.slice(0, 3).length * 4;
+        }
+
+        // Stack trace
+        if (r.stackTrace) {
+          doc.setTextColor(148, 163, 184);
+          const stLines = doc.splitTextToSize(r.stackTrace, W - 28);
+          const show = stLines.slice(0, 10);
+          doc.text(show, 14, y);
+          y += show.length * 3.8;
+          if (stLines.length > 10) {
+            doc.setTextColor(99, 102, 241);
+            doc.text(`   … ${stLines.length - 10} more lines`, 14, y);
+            y += 4;
+          }
+        }
+
+        // Response body snippet for non-stack failures
+        if (!r.stackTrace && r.body) {
+          doc.setTextColor(148, 163, 184);
+          const bodyStr = typeof r.body === 'object' ? JSON.stringify(r.body) : String(r.body);
+          const bodyLines = doc.splitTextToSize('   Body: ' + bodyStr.slice(0, 300), W - 28);
+          doc.text(bodyLines.slice(0, 4), 14, y);
+          y += bodyLines.slice(0, 4).length * 4;
+        }
+
+        // Separator
+        y += 4;
+        doc.setDrawColor(51, 65, 85);
+        doc.line(14, y - 2, W - 14, y - 2);
+        y += 4;
+      }
+
+      if (failures.length > 50) {
+        doc.setFontSize(9); doc.setTextColor(148, 163, 184);
+        doc.text(`… and ${failures.length - 50} more failures (use the dashboard filter to review all)`, 14, y + 4);
+      }
+    }
+
+    // Save
+    const fname = `api-test-report-${new Date().toISOString().slice(0,19).replace(/:/g,'-')}.pdf`;
+    doc.save(fname);
+    toast('✅ PDF exported: ' + fname);
+  } catch (e) {
+    console.error('PDF export failed:', e);
+    toast('❌ PDF export failed: ' + e.message, 5000);
+  }
+}
+
+// ── Clear history ──────────────────────────────────────────────────────────────
+async function clearHistory() {
+  if (!confirm('Clear all execution history? This cannot be undone.')) return;
+  try {
+    await fetch('/api/results', { method: 'DELETE' });
+    allResults = [];
+    renderStats(computeStats([]));
+    renderCharts([]);
+    renderTable();
+    toast('History cleared');
+  } catch (e) {
+    toast('❌ ' + e.message);
+  }
+}
+
+// ── Utilities ──────────────────────────────────────────────────────────────────
+function set(id, val) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = val;
+}
+
+function esc(s) {
+  if (s == null) return '';
+  return String(s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function relTime(ts) {
+  if (!ts) return '—';
+  const d    = new Date(ts);
+  const diff = Date.now() - d.getTime();
+  if (diff < 5000)    return 'just now';
+  if (diff < 60000)   return Math.floor(diff / 1000) + 's ago';
+  if (diff < 3600000) return Math.floor(diff / 60000) + 'm ago';
+  if (diff < 86400000)return Math.floor(diff / 3600000) + 'h ago';
+  return d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' });
+}
+
+function fmtTime(ts) {
+  if (!ts) return '';
+  const d = new Date(ts);
+  return d.toLocaleTimeString([], { hour:'2-digit', minute:'2-digit', second:'2-digit' });
+}
+
+let toastTimer;
+function toast(msg, ms = 3000) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), ms);
+}
+
+// ── Kick off ───────────────────────────────────────────────────────────────────
+init();
+</script>
+</body>
+</html>

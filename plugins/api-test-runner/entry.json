@@ -1,0 +1,31 @@
+{
+  "name": "api-test-runner",
+  "displayName": "API Test Runner",
+  "description": "Execute API test cases from Swagger / OpenAPI specs using Playwright. Auto-acquires bearer tokens, loads parameters from files, and streams results to a live dashboard with charts, stack traces, and PDF export.",
+  "version": "1.2.0",
+  "author": {
+    "name": "Surendran E",
+    "github": "https://github.com/sethiraj"
+  },
+  "repository": "https://github.com/sethiraj/sethiraj_claude",
+  "homepage": "https://github.com/sethiraj/sethiraj_claude/tree/main/plugins/api-test-runner#readme",
+  "license": "MIT",
+  "keywords": [
+    "api", "testing", "playwright", "swagger", "openapi",
+    "rest", "bearer-token", "dashboard", "reporting", "http-client"
+  ],
+  "category": "testing",
+  "requires": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "skills": ["api-test-runner"],
+  "agents": ["api-test-reporter"],
+  "hooks": ["SessionStart", "PostToolUse"],
+  "install": "claude plugin install api-test-runner@sethiraj_claude",
+  "changelog": {
+    "1.2.0": "Added hooks: SessionStart auto-installs Node.js and Playwright; PostToolUse prints dashboard link after every test run",
+    "1.1.0": "Added real-time dashboard (SSE + Chart.js), pass/fail trend charts, stack trace inspection, PDF export via jsPDF + html2canvas, api-test-reporter agent",
+    "1.0.0": "Initial release — OpenAPI/Swagger spec parsing, Playwright HTTP execution, bearer token auto-acquisition, filesystem-as-parameters, path/query/body routing, CI-friendly exit codes"
+  }
+}

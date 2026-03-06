@@ -1,0 +1,13 @@
+{
+  "name": "api-test-runner",
+  "version": "1.2.0",
+  "description": "Execute API test cases using Playwright against Swagger/OpenAPI specifications. Supports file-based request parameters, automatic bearer token acquisition, real-time dashboard with pass/fail trends, stack trace inspection, and one-click PDF export.",
+  "author": {
+    "name": "Claude Code"
+  },
+  "license": "MIT",
+  "keywords": ["api", "testing", "playwright", "swagger", "openapi", "rest", "bearer-token", "dashboard", "reporting"],
+  "skills": "./skills/",
+  "agents": "./agents/",
+  "hooks":  "./hooks/hooks.json"
+}

@@ -1,0 +1,19 @@
+{
+  "name": "api-test-runner",
+  "version": "1.1.0",
+  "description": "Playwright-based API test executor with real-time dashboard for Swagger/OpenAPI specifications",
+  "main": "scripts/api-runner.js",
+  "scripts": {
+    "test":       "node scripts/api-runner.js",
+    "dashboard":  "node scripts/dashboard-server.js",
+    "report":     "node scripts/api-runner.js --report"
+  },
+  "dependencies": {
+    "js-yaml":    "^4.1.0",
+    "playwright": "^1.49.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "license": "MIT"
+}
